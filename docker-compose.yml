@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres
+    container_name: my-postgres123
+    restart: always
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: "lee1"
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: todolist
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lee1 -d todolist"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  backend:
+    build: .
+    container_name: goodnight
+    ports:
+      - "8080:8080"
+    depends_on:
+       db:
+         condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/todolist
+      SPRING_DATASOURCE_USERNAME: lee1
+      SPRING_DATASOURCE_PASSWORD: 1234
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    healthcheck:
+      test: ["CMD-SHELL","curl -f http://localhost:8080/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
