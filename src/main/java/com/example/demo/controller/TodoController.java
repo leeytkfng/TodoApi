@@ -39,7 +39,7 @@ public class TodoController {
     @PutMapping("/{id}")
     @Operation(summary = "할일 리스트 수정 " ,description = "id에따라서 수정할수있도록")
     public ResponseEntity<TodoResponseDto> updateTodo(@PathVariable Long id,@RequestBody TodoRequestDto dto){
-        return ResponseEntity.ok(todoService.updateDto(id, dto));
+        return ResponseEntity.ok(todoService.updateTodo(id, dto));
     }
 
     //삭제

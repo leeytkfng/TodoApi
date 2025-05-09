@@ -1,32 +1,21 @@
 package com.example.demo.dto;
 
-
 import lombok.Getter;
 import lombok.Setter;
+import lombok.NoArgsConstructor;
 
-
+@Getter
+@Setter
+@NoArgsConstructor
 public class TodoRequestDto {
-    public String getTitle() {
-        return title;
-    }
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
+    private String author; // 작성자
+    private String title;  // 할 일 제목
+    private boolean completed; // 완료 여부
 
-    public boolean isCompleted() {
-        return completed;
-    }
-
-    public void setCompleted(boolean completed) {
-        this.completed = completed;
-    }
-
-    public TodoRequestDto(String title, boolean completed) {
+    public TodoRequestDto(String author, String title, boolean completed) {
+        this.author = author;
         this.title = title;
         this.completed = completed;
     }
-
-    private String title;
-    private boolean completed;
 }

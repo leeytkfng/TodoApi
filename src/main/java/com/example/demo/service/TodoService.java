@@ -4,13 +4,12 @@ import com.example.demo.dto.TodoRequestDto;
 import com.example.demo.dto.TodoResponseDto;
 import com.example.demo.entity.Todo;
 import com.example.demo.repository.TodoRepository;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
-import org.slf4j.Logger;
 
 @Service
 public class TodoService {
@@ -19,43 +18,57 @@ public class TodoService {
 
     private final TodoRepository todoRepository;
 
-    public TodoService(TodoRepository todoRepository){
-         this.todoRepository = todoRepository;
+    public TodoService(TodoRepository todoRepository) {
+        this.todoRepository = todoRepository;
     }
 
-    //모든 TodList 조회
+    // 모든 TodoList.jsx 조회
     public List<TodoResponseDto> getAllTodoList() {
-        return todoRepository.findAll().stream().map(todo -> new TodoResponseDto(todo.getId(),todo.getTitle(),todo.isCompleted()))
+        return todoRepository.findAll().stream()
+                .map(this::convertToDto)
                 .collect(Collectors.toList());
-   }
+    }
 
-      //TodoLISt 생성
-     public TodoResponseDto createTodo(TodoRequestDto dto){
-
+    // Todo 생성
+    public TodoResponseDto createTodo(TodoRequestDto dto) {
         Todo todo = new Todo();
+        todo.setAuthor(dto.getAuthor()); // 작성자 추가
         todo.setTitle(dto.getTitle());
         todo.setCompleted(dto.isCompleted());
+        todo.setCreatedDate(java.time.LocalDateTime.now()); // 생성 날짜 세팅
 
-        logger.debug("todolist정보: {}",dto);
-        Todo savedTodo =  todoRepository.save(todo);
+        logger.debug("todolist 정보: {}", dto);
 
-        return new TodoResponseDto(savedTodo.getId(),savedTodo.getTitle(),savedTodo.isCompleted());
-     }
+        Todo savedTodo = todoRepository.save(todo);
 
-    //TodoList 업데이트
-    public TodoResponseDto updateDto(Long id, TodoRequestDto dto){
-        return todoRepository.findById(id).map(todo ->{
-            todo.setTitle(dto.getTitle());
-            todo.setCompleted(dto.isCompleted());
-
-            Todo update = todoRepository.save(todo);
-            return new TodoResponseDto(update.getId(), update.getTitle(),update.isCompleted());
-        }).orElseThrow(() -> new RuntimeException("todo 없다"));
+        return convertToDto(savedTodo);
     }
 
-    //TodoList 삭제
-    public void deleteTodo(Long id){
+    // Todo 업데이트
+    public TodoResponseDto updateTodo(Long id, TodoRequestDto dto) {
+        return todoRepository.findById(id).map(todo -> {
+            todo.setTitle(dto.getTitle());
+            todo.setCompleted(dto.isCompleted());
+            Todo updatedTodo = todoRepository.save(todo);
+            return convertToDto(updatedTodo);
+        }).orElseThrow(() -> new RuntimeException("해당 Todo가 없습니다."));
+    }
+
+    // Todo 삭제
+    public void deleteTodo(Long id) {
         todoRepository.deleteById(id);
     }
 
+    // 엔티티 -> DTO 변환 메서드
+    private TodoResponseDto convertToDto(Todo todo) {
+        double progress = todo.isCompleted() ? 100.0 : 0.0; // 예시: 완료 여부로 작성률 설정
+        return new TodoResponseDto(
+                todo.getId(),
+                todo.getAuthor(),
+                todo.getTitle(),
+                todo.isCompleted(),
+                todo.getCreatedDate(),
+                progress
+        );
+    }
 }

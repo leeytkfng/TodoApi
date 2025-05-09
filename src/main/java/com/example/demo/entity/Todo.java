@@ -2,46 +2,41 @@ package com.example.demo.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import java.time.LocalDateTime;
 
 @Entity
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Todo {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
+    private String author; // 작성자
 
-    @Column
-    private String title;
+    @Column(nullable = false)
+    private String title; // 할 일 제목
 
-    private boolean completed;
+    @Column(nullable = false)
+    private boolean completed; // 완료 여부
 
-    public Todo() {}
+    @Column(nullable = false)
+    private LocalDateTime createdDate; // 작성일
 
-    public Todo(String tile , boolean completed){
-        this.title = tile;
-        this.completed =completed;
-    }
+    @Transient
+    private double progress; // 작성률 (DB에 저장 안 함, 계산용)
 
+    // 작성률은 외부 로직에서 계산해서 setProgress 하도록 설계
 
-    public Long getId() {
-        return id;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
+    public Todo(String author, String title, boolean completed) {
+        this.author = author;
         this.title = title;
-    }
-
-    public boolean isCompleted() {
-        return completed;
-    }
-
-    public void setCompleted(boolean completed) {
         this.completed = completed;
+        this.createdDate = LocalDateTime.now(); // 생성 시점 자동 입력
     }
-
-
 }
